@@ -46,7 +46,6 @@ imagespace.views.SearchView = imagespace.View.extend({
 
             $('.alert-info').addClass('hidden');
         }, this));
-        this.collection.fetch(this.collection.params || {});
     },
 
     render: function () {
@@ -96,10 +95,12 @@ imagespace.router.route('search/:query(/params/:params)', 'search', function (qu
         imagespace.searchView.destroy();
     }
 
+    var coll = imagespace.getImageCollectionFromQuery(query);
     imagespace.searchView = new imagespace.views.SearchView({
-        collection: imagespace.getImageCollectionFromQuery(query),
+        collection: coll,
         parentView: window.app
     });
+    coll.fetch(coll.params || {});
 });
 
 imagespace.router.route('search/:url/:mode(/params/:params)', 'search', function (url, mode, params) {
