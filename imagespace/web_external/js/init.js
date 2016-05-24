@@ -29,50 +29,53 @@ _.extend(imagespace, {
      * in that context.
      **/
     searches: {
-        make: {
+        username: {
             search: function (image) {
                 return imagespace.getImageCollectionFromQuery(
-                    'make_t_md:"' + image.get('make_t_md') + '"');
+                    'source_user_username:"' + image.get('source_user_username') + '"');
             },
-            niceName: 'Camera Make',
-            tooltip: 'Search by the make of the camera used to take this image',
+            niceName: 'Username',
+            tooltip: 'Search by the Instagram username',
             displayContext: function (image) {
-                return image.has('make_t_md');
+                return image.has('source_user_username');
+            }
+        },
+        full_name: {
+            search: function (image) {
+                return imagespace.getImageCollectionFromQuery(
+                    'source_user_full_name:"' + image.get('source_user_full_name') + '"');
+            },
+            niceName: 'Full name',
+            tooltip: 'Search by the Instagram user full_name',
+            displayContext: function (image) {
+                return image.has('source_user_full_name');
+            }
+        },
+        location_name: {
+            search: function (image) {
+                return imagespace.getImageCollectionFromQuery(
+                    'source_location_name:"' + image.get('source_location_name') + '"');
+            },
+            niceName: 'Location',
+            tooltip: 'Search by the Instagram location name',
+            displayContext: function (image) {
+                return image.has('source_location_name');
             }
         },
         size: {
             search: function (image) {
-                var lengthKey = 'tiff\\:imagelength_l_md',
-                    widthKey = 'tiff\\:imagewidth_l_md';
+                var lengthKey = 'source_images_standard_resolution_height',
+                    widthKey = 'source_images_standard_resolution_width';
 
                 return imagespace.getImageCollectionFromQuery(
-                    lengthKey + ':' + image.get('tiff:imagelength_l_md') + ' AND ' + widthKey + ':' + image.get('tiff:imagewidth_l_md'));
+                    lengthKey + ':' + image.get('source_images_standard_resolution_height') + ' AND ' + widthKey + ':' + image.get('source_images_standard_resolution_height'));
             },
             niceName: 'Size',
             tooltip: 'Search for other images with these dimensions',
             displayContext: function (image) {
-                return image.has('tiff:imagelength_l_md') && image.has('tiff:imagewidth_l_md');
+                return image.has('source_images_standard_resolution_height') && image.has('source_images_standard_resolution_width');
             }
         },
-        location: {
-            search: function (image) {
-                var latKey = 'geo:lat_d_md',
-                    longKey = 'geo:long_d_md',
-                    geoLatDelta = image.get(latKey) < 0 ? -1 : 1,
-                    geoLongDelta = image.get(longKey) < 0 ? -1 : 1,
-                    latRange = [image.get(latKey) - geoLatDelta, image.get(latKey) + geoLatDelta],
-                    longRange = [image.get(longKey) - geoLongDelta, image.get(longKey) + geoLongDelta];
-
-                return imagespace.getImageCollectionFromQuery(
-                    'geo\\:lat_d_md:[' + latRange[0] + ' TO ' + latRange[1] + '] AND geo\\:long_d_md:[' + longRange[0] + ' TO ' + longRange[1] + ']'
-                );
-            },
-            niceName: 'Location',
-            tooltip: 'Search for other images taken near this one',
-            displayContext: function (image) {
-                return image.has('geo:lat_d_md') && image.has('geo:long_d_md');
-            }
-        }
     },
 
     // Determines what search to use for similarity by default (magnifying glass icon)
