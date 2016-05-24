@@ -8,7 +8,7 @@ if frontPage
   if dropzone
     .hide
        input#im-files(type="file", multiple="multiple")
-  input.im-search.form-control(type="text", placeholder=(girder.currentUser) ? "Enter a search term or drop an image..." : "Enter a search term or log in to drop an image...", value=query)
+  input.im-search.form-control(type="text", placeholder=(girder.currentUser) ? "Search post metadata or drop an image..." : "Search post metadata or log in to drop an image...", value=query)
 
   if dropzone
     button.btn.btn-primary.im-advanced-search-button
