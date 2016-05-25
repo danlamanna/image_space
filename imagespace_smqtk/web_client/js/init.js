@@ -7,6 +7,7 @@ girder.events.once('im:appload.after', function () {
                         url: encodeURIComponent(_.has(image, 'imageUrl') ? image.imageUrl : image.get('imageUrl'))
                     },
                     supportsPagination: false,
+                    pageLimit: 500,
                     comparator: function (image) {
                         return image.get('smqtk_distance');
                     }

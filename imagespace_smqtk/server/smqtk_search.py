@@ -26,7 +26,7 @@ import json
 import requests
 import os
 
-DEFAULT_PAGE_SIZE = 100
+DEFAULT_PAGE_SIZE = 500
 NEAR_DUPLICATES_THRESHOLD = -1500  # Maximum distance to be considered a near duplicate
 
 class SmqtkSimilaritySearch(Resource):
