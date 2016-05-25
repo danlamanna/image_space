@@ -21,7 +21,7 @@ import mako
 import os
 import requests
 import subprocess
-from girder import constants
+from girder import constants, events
 from girder.constants import SettingKey
 from girder.utility.model_importer import ModelImporter
 from .imagefeatures_rest import ImageFeatures
@@ -174,9 +174,8 @@ def load(info):
     info['serverRoot'].api = info['serverRoot'].girder.api
 
 
-def solr_documents_from_paths(paths, classifications=None):
-    """Given a list of paths, return list of relevant solr documents
-    by uppercasing the basename of the paths.
+def solr_documents_from_field(field, values, classifications=None):
+    """Given a field, and a list of values, return list of relevant solr documents.
 
     This performs several requests, each of size CHUNK_SIZE to avoid sending
     too much data (HTTP 413).
@@ -191,8 +190,16 @@ def solr_documents_from_paths(paths, classifications=None):
     CHUNK_SIZE = 20
     documents = []
 
-    for i in xrange(0, len(paths), CHUNK_SIZE):
-        paths_chunk = paths[i:i + CHUNK_SIZE]
+    event = events.trigger('imagespace.solr_documents_from_field', info={
+        'field': field,
+        'values': values
+    })
+    for response in event.responses:
+        field = response['field']
+        values = response['values']
+
+    for i in xrange(0, len(values), CHUNK_SIZE):
+        values_chunk = values[i:i + CHUNK_SIZE]
 
         if classifications:
             q = ' OR '.join(['%s:[.7 TO *]' % key
@@ -200,14 +207,27 @@ def solr_documents_from_paths(paths, classifications=None):
         else:
             q = '*:*'
 
-        r = requests.get(os.environ['IMAGE_SPACE_SOLR'] + '/select', params={
+        qparams = {
             'wt': 'json',
             'q': q,
-            'fq': ['mainType:image',
-                   'resourcename_t_md:(%s)' %
-                   ' '.join('%s' % os.path.basename(p).upper() for p in paths_chunk)],
             'rows': str(CHUNK_SIZE)
-        }, verify=False)
+        }
+
+        # Give plugins a chance to adjust the Solr query parameters
+        event = events.trigger('imagespace.imagesearch.qparams', qparams)
+        for response in event.responses:
+            qparams = response
+
+        # Filter by field
+        qparams['fq'] = qparams['fq'] if 'fq' in qparams else []
+        qparams['fq'].append('%(field)s:(%(value)s)' % {
+            'field': field,
+            'value': ' '.join(values_chunk)
+        })
+
+        r = requests.get(os.environ['IMAGE_SPACE_SOLR'] + '/select',
+                         params=qparams,
+                         verify=False)
 
         documents += r.json()['response']['docs']
 
