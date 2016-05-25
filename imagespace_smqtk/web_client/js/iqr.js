@@ -110,7 +110,8 @@ girder.events.once('im:appload.after', function () {
 
     imagespace.smqtk.iqr.createOrUpdateRefineView = function () {
         if (imagespace.searchView.collection instanceof imagespace.collections.IqrImageCollection) {
-            imagespace.searchView.collection.fetch(imagespace.searchView.collection.params || {});
+            // Updating, reset the collection so it goes back to page 1
+            imagespace.searchView.collection.fetch(imagespace.searchView.collection.params || {}, true);
         } else {
             imagespace.smqtk.iqr.RefineView();
         }
