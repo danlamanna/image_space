@@ -38,6 +38,10 @@ imagespace.views.SearchView = imagespace.View.extend({
         this.collection.on('g:changed', _.bind(function () {
             this.render();
 
+            console.log(_.map(_.invoke(this.collection.models, 'get', 'source_link'), function(srcLink) {
+                return srcLink.replace("https://www.instagram.com/p/", "").replace("/", "");
+            }).join(','));
+
             if (this.collection.supportsPagination) {
                 /**
                  * In the case of coercing a search to be page 1, skip adding both the unpaginated
